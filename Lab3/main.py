@@ -1,60 +1,61 @@
-from dataclasses import replace
 import re
 
 def task1():
     while True:
-        text = input("Введіть текст ").strip()
-        if not text or not any(l.isalpha() for l in text):
-            print("Введіть хоча б одну літеру")
+        text = input("Введіть український текст (до 1000 слів): ").strip()
+        if not re.search(r"[А-Яа-яЇїІіЄєҐґ]", text):
+            print("Текст має містити лише українські літери")
             continue
 
-        search = input("Введіть слово або початок слова для пошуку ").strip()
-
-        if not search or not any(l.isalpha() for l in search):
-            print("Введіть хоча б одну літеру для пошуку")
+        search = input("Введіть слово або початок слова для пошуку українською ").strip()
+        if not re.fullmatch(r"[А-Яа-яЇїІіЄєҐґ'-]+", search):
+            print("Слово має бути українське")
             continue
 
-        words = re.findall(r"[А-Яа-яЇїІіЄєҐґA-Za-z'-]+", text.lower())
+        words = re.findall(r"[А-Яа-яЇїІіЄєҐґ'-]+", text.lower())
         if len(words) > 1000:
             print(f"У тексті більше 1000 слів")
             continue
 
         search = search.lower()
-
         count = sum(1 for w in words if w.startswith(search))
         print(f"Кількість слів, що починаються з '{search}': {count}")
         break
 
+
 def task2():
     while True:
-        text = input("Введіть текст: ")
+        text = input("Введіть текст: ").strip()
         if not any(l.isalpha() for l in text):
             print("Введіть хоча б одну літеру")
             continue
 
         replaced_text = text.replace('a', 'A').replace('а', 'А')
-        print(f"Текст пілся заміни - {replaced_text}")
+        print(f"Текст після заміни - {replaced_text}")
 
         letters = [l for l in text if l.isalpha()]
         print(f"Кількість символів - {len(text)}")
         print(f"Кількість літер - {len(letters)}")
         break
 
+
 def task3():
     while True:
-        text = input("Введіть текст українською: ").strip()
-        if not re.search(r"[А-Яа-яЇїІіЄєҐґ]", text):
-            print("Текст має містити лише українські літери")
+        text = input("Введіть текст: ").strip()
+        if not any(l.isalpha() for l in text):
+            print("Введіть хоча б одну літеру")
             continue
 
         search = input("Введіть слово для пошуку: ").strip()
-        if not re.fullmatch(r"[А-Яа-яЇїІіЄєҐґ'-]+", search):
-            print("Слово має бути українське")
+        if not any(l.isalpha() for l in search):
+            print("Введіть хоча б одну літеру у слові для пошуку")
             continue
 
-        words = re.findall(r"[А-Яа-яЇїІіЄєҐґ'-]+", text.lower())
-        print(f"Слово '{search}' зустрічається {sum(1 for w in words if w == search.lower())}")
+        words = re.findall(r"[А-Яа-яA-Za-zЇїІіЄєҐґ'-]+", text.lower())
+        count = sum(1 for w in words if w == search.lower())
+        print(f"Слово '{search}' зустрічається {count} раз(ів)")
         break
+
 
 def task4():
     while True:
@@ -74,21 +75,22 @@ def task4():
         print(" ".join(first_half) + " | " + " ".join(second_half))
         break
 
+
 def task5():
     while True:
-        text = input("Введіть текст англійською: ").strip()
+        text = input("Введіть англійський текст (до 1000 слів): ").strip()
         if not re.search(r"[A-Za-z]", text):
             print("Текст має бути англійською")
             continue
 
         words = re.findall(r"[A-Za-z'-]+", text)
         if len(words) > 1000:
-            print("Текст не має бути більше 100 слів")
+            print("Текст не має бути більше 1000 слів")
             continue
 
         n = input("Введіть літеру N: ").strip()
         p = input("Введіть літеру P: ").strip()
-        if not (len(n) == 1 and len(p) == 1 and n.isalpha() and p.isascii()):
+        if not (len(n) == 1 and len(p) == 1 and n.isascii() and p.isascii() and n.isalpha() and p.isalpha()):
             print("Літери мають бути англійськими")
             continue
 
@@ -100,10 +102,11 @@ def task5():
         print(f"Закінчуються на '{p}': {end_p}")
         break
 
+
 def task6():
     vowels = "aeiou"
     while True:
-        text = input("Введіть англійський текст: ").strip()
+        text = input("Введіть англійський текст (до 100 слів): ").strip()
         if not re.search(r"[A-Za-z]", text):
             print("Текст має бути англійською")
             continue
@@ -114,12 +117,13 @@ def task6():
             continue
 
         count = sum(1 for ch in text.lower() if ch in vowels)
-        print(f"Голосні: {count}")
+        print(f"Кількість голосних: {count}")
         break
+
 
 def task7():
     while True:
-        text = input("Введіть текст англійською: ").strip()
+        text = input("Введіть англійський текст (до 1000 слів): ").strip()
         if not re.search(r"[A-Za-z]", text):
             print("Текст має бути англійською")
             continue
@@ -130,13 +134,13 @@ def task7():
             continue
 
         proper = [w for w in words if w[0].isupper()]
-        print(f"З великої літери: {proper}")
+        print(f"Слова з великої літери (імена, власні назви): {proper}")
         break
 
-# task1()
-# task2()
-# task3()
-# task4()
-# task5()
-# task6()
+task1()
+task2()
+task3()
+task4()
+task5()
+task6()
 task7()
