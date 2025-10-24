@@ -92,8 +92,8 @@ def task6():
 
 def task7():
     import random
-    arr = [random.uniform(-100, 100) for _ in range(30)]
-    min_abs = min(arr, key=lambda x: abs(x))
+    arr = [random.randint(-100, 100) for _ in range(30)]
+    min_abs = max(arr, key=lambda x: abs(x))
     print("Мінімальний по модулю:", min_abs)
     print("В порядку зростання:", sorted(arr))
 
@@ -103,14 +103,14 @@ def task8():
     groups = [arr[i:i + 3] for i in range(0, 30, 3)]
     groups.sort(key=lambda g: sum(abs(x) for x in g))
     for g in groups:
-        print(g)
+        print(f"{g} -> сума = {sum(abs(x) for x in g):.2f}")
 
 
-task1()
-task2()
-task3()
-task4()
-task5()
-task6()
+# task1()
+# task2()
+# task3()
+# task4()
+# task5()
+# task6()
 task7()
-task8()
+# task8()

@@ -3,7 +3,7 @@ import re
 def task1():
     while True:
         text = input("Введіть український текст (до 1000 слів): ").strip()
-        if not re.search(r"[А-Яа-яЇїІіЄєҐґ]", text):
+        if not re.fullmatch(r"[А-Яа-яЇїІіЄєҐґ]", text):
             print("Текст має містити лише українські літери")
             continue
 
@@ -56,30 +56,48 @@ def task3():
         print(f"Слово '{search}' зустрічається {count} раз(ів)")
         break
 
-
 def task4():
+    allowed = re.compile(r"^[А-Яа-яЇїІіЄєҐґ\s.,!?:;\"'()\[\]{}«»„“”’\-—–…]+$")
+    ua = re.compile(r"[А-Яа-яЇїІіЄєҐґ]+(?:[-'’][А-Яа-яЇїІіЄєҐґ]+)*")
+
     while True:
         text = input("Введіть український текст (до 1000 слів): ").strip()
-        if not re.search(r"[А-Яа-яЇїІіЄєҐґ]", text):
+        if not text:
+            print("Рядок порожній")
+            continue
+        if not allowed.fullmatch(text):
             print("Текст має містити лише українські літери")
             continue
 
-        words = re.findall(r"[А-Яа-яЇїІіЄєҐґ'-]+", text)
-        if len(words) > 1000:
+        words = list(ua.finditer(text))
+        n = len(words)
+        if n == 0:
+            print(" | "); break
+        if n > 1000:
             print("Кількість слів більше 1000")
             continue
 
-        mid = len(words) // 2
-        first_half = [w.capitalize() for w in words[:mid]]
-        second_half = [w.lower() + "*" for w in words[mid:]]
-        print(" ".join(first_half) + " | " + " ".join(second_half))
+        mid, out, pos = n // 2, [], 0
+        for i, m in enumerate(words, 1):
+            s, e = m.span()
+            if s > pos:
+                out.append(text[pos:s])
+            w = m.group()
+            if i <= mid:
+                out.append(w.capitalize())
+                if i == mid:
+                    out.append(" |")
+            else:
+                out.append(w.lower() + "*")
+            pos = e
+        out.append(text[pos:])
+        print("".join(out))
         break
-
 
 def task5():
     while True:
         text = input("Введіть англійський текст (до 1000 слів): ").strip()
-        if not re.search(r"[A-Za-z]", text):
+        if not re.fullmatch(r"[A-Za-z]", text):
             print("Текст має бути англійською")
             continue
 
@@ -137,10 +155,10 @@ def task7():
         print(f"Слова з великої літери (імена, власні назви): {proper}")
         break
 
-task1()
-task2()
-task3()
+# task1()
+# task2()
+# task3()
 task4()
-task5()
-task6()
-task7()
+# task5()
+# task6()
+# task7()
