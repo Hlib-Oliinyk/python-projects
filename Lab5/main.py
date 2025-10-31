@@ -1,3 +1,4 @@
+from datetime import datetime
 
 def task1():
     def is_prime(num):
@@ -143,6 +144,125 @@ def task3():
         print(f'{err}')
 
 
+def task4():
+    def is_valid_date(date_str, date_format="%Y-%m-%d"):
+        try:
+            datetime.strptime(date_str, date_format)
+            return True
+        except (ValueError, TypeError):
+            return False
+
+    def analyze_expenses(expenses):
+        category_totals = {}
+        max_expense = None
+        invalid_dates = []
+        errors = []
+        seen_dates = set()
+
+        for expense in expenses:
+            if not isinstance(expense, tuple) or len(expense) != 3:
+                errors.append(expense)
+                continue
+
+            amount, category, date = expense
+
+            amount_ok = isinstance(amount, (int, float)) and amount is not None
+            category_ok = isinstance(category, str) and category
+            date_is_string = isinstance(date, str)
+            date_valid = date_is_string and is_valid_date(date)
+
+            if not amount_ok or not category_ok or not date_is_string:
+                errors.append(expense)
+            else:
+                category_totals[category] = category_totals.get(category, 0) + amount
+
+                if max_expense is None or amount > max_expense[0]:
+                    max_expense = expense
+
+                if not date_valid and date not in seen_dates:
+                    invalid_dates.append(date)
+                    seen_dates.add(date)
+
+        return {
+            "category_totals": category_totals,
+            "max_expense": max_expense,
+            "invalid_dates": invalid_dates,
+            "errors": errors
+        }
+
+    result = analyze_expenses([
+        (100, "офіс", "2024-06-01"),
+        (200, "маркетинг", "2024-06-02"),
+        (50, "офіс", "2024-13-01"),
+        (None, "маркетинг", "2024-06-02"),  # некоректна сума
+        (100, None, "2024-06-01"),  # некоректна категорія
+        (100, "офіс", None),  # некоректна дата
+        "не кортеж",  # невірний формат даних
+        123,  # невірний формат даних
+        None,  # невірний формат даних
+        (100, "офіс"),  # невірний формат всередині кортежу
+        (100,),  # невірний формат всередині кортежу
+        (100, "офіс", "2024-06-01", "extra")  # зайвий елемент у кортежі
+    ])
+
+    print(f'category_totals: {result["category_totals"]},')
+    print(f'max_expense: {result["max_expense"]},')
+    print(f'invalid_dates: {result["invalid_dates"]},')
+    print('errors:')
+    for err in result["errors"]:
+        print(f'{err}')
+
+
+def task5():
+    def filter_reports(reports, output_format, keyword):
+        filtered_reports = []
+        errors = []
+
+        for report in reports:
+            if not isinstance(report, tuple) or len(report) != 3:
+                errors.append(report)
+                continue
+
+            name, author, format_type = report
+
+            name_ok = isinstance(name, str) and name.strip()
+            author_ok = isinstance(author, str) and author.strip()
+            format_ok = isinstance(format_type, str) and format_type.strip()
+
+            if not name_ok or not author_ok or not format_ok:
+                errors.append(report)
+            else:
+                if format_type == output_format and (keyword in name or keyword in author):
+                    filtered_reports.append(report)
+
+        count = len(filtered_reports)
+
+        return (filtered_reports, count, errors)
+
+    result = filter_reports(
+        [
+            ("Звіт1", "Іван Іванов", "pdf"),
+            ("Звіт2", "Олена Петрівна", "docx"),
+            ("", "Іван Іванов", "pdf"),  # некоректна назва
+            ("Звіт3", "", "pdf"),  # некоректний автор
+            ("Звіт4", "Петро Сидоров", ""),  # некоректний формат
+            "не кортеж",  # невірний формат даних
+            123,  # невірний формат даних
+            None,  # невірний формат даних
+            ("Звіт5",),  # невірний формат всередині кортежу
+            ("Звіт6", "Іван Іванов"),  # невірний формат всередині кортежу
+            ("Звіт7", "Іван Іванов", 123),  # невірний тип для формату
+        ],
+        "pdf",
+        "Іва"
+    )
+
+    print(f'{result[0]},')
+    print(f'{result[1]},')
+
+    for err in result[2]:
+        print(f'{err}')
+
 def main():
     while True:
         try:
@@ -156,6 +276,10 @@ def main():
                     task2()
                 case 3:
                     task3()
+                case 4:
+                    task4()
+                case 5:
+                    task5()
                 case _:
                     print("Функції з таким номером не має")
         except ValueError:
