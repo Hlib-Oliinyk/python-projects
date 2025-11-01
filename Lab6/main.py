@@ -1,4 +1,9 @@
 import os
+from datetime import datetime
+import time
+import re
+import csv
+from collections import Counter, defaultdict
 
 curr_dic = os.getcwd()
 
@@ -143,6 +148,258 @@ def task4():
     with open(false_path, "r", encoding='utf-8') as f:
         print(f.read())
 
+
+def task5():
+    dic_task5 = os.path.join(curr_dic, 'file for task 5')
+    if not os.path.exists(dic_task5):
+        os.makedirs(dic_task5)
+
+    file_path = os.path.join(dic_task5, 'guest_book.txt')
+
+    file_exists = os.path.exists(file_path)
+    creation_time = datetime.fromtimestamp(os.path.getctime(file_path)) if file_exists else datetime.now()
+
+    if not file_exists:
+        with open(file_path, "w", encoding='utf-8') as f:
+            f.write(f"Гостьова книга створена: {creation_time.strftime('%d.%m.%Y %H:%M:%S')}\n")
+
+    def is_valid_name(name):
+        for char in name:
+            if not (char.isalpha() or char in [' ', '-', "'"]):
+                return False
+        return True
+
+    print("Введіть 'вихід' для завершення\n")
+
+    while True:
+        name = input("Введіть ваше ім'я: ").strip()
+
+        if name.lower() == 'вихід':
+            break
+
+        if not name:
+            print("Ім'я не може бути порожнім\n")
+            continue
+
+        if not is_valid_name(name):
+            print("Помилка в введенні імені\n")
+            continue
+
+        current_time = datetime.now().strftime('%d.%m.%Y %H:%M:%S')
+        greeting = f"Вітаємо, {name}! Дякуємо за візит [{current_time}]"
+
+        print(f"\n{greeting}\n")
+
+        with open(file_path, "a", encoding='utf-8') as f:
+            f.write(f"{greeting}\n")
+
+    last_modified = datetime.fromtimestamp(os.path.getmtime(file_path)).strftime('%d.%m.%Y %H:%M:%S')
+
+    with open(file_path, "a", encoding='utf-8') as f:
+        f.write(f"Останні внесені зміни: {last_modified}\n")
+
+
+def task6():
+    dic_task6 = os.path.join(curr_dic, 'file for task 6')
+    if not os.path.exists(dic_task6):
+        os.makedirs(dic_task6)
+
+    file_path = os.path.join(dic_task6, 'python_article.txt')
+    result_path = os.path.join(dic_task6, 'analysis_result.txt')
+
+    start_time = time.time()
+    start_datetime = datetime.now().strftime('%d.%m.%Y %H:%M:%S')
+
+    with open(file_path, "r", encoding='utf-8') as f:
+        text = f.read()
+
+    text_lower = text.lower()
+
+    choice = None
+    while choice not in ["1", "2", "3"]:
+        print("Виберіть режим аналізу:")
+        print("1 - Частота літер")
+        print("2 - Частота слів (всі)")
+        print("3 - Частота слів (повторилось 2+ рази)")
+        choice = input("Введіть 1, 2 або 3: ").strip()
+
+        if choice not in ["1", "2", "3"]:
+            print("Невірний вибір! Спробуйте ще раз.\n")
+
+    if choice == "1":
+        letter_freq = {}
+        for char in text_lower:
+            if char.isalpha():
+                letter_freq[char] = letter_freq.get(char, 0) + 1
+
+        sorted_freq = sorted(letter_freq.items(), key=lambda x: x[1], reverse=True)
+        title = "Частота літер у тексті"
+        result_data = sorted_freq
+
+    elif choice == "2":
+        words = text_lower.split()
+        word_freq = {}
+        for word in words:
+            word = re.sub(r'[^a-z]', '', word)
+            if len(word) >= 2:
+                word_freq[word] = word_freq.get(word, 0) + 1
+        sorted_freq = sorted(word_freq.items(), key=lambda x: x[1], reverse=True)
+        title = "Частота всіх англійських слів у тексті (мін. 2 символи)"
+        result_data = sorted_freq
+
+    elif choice == "3":
+        words = text_lower.split()
+        word_freq = {}
+        for word in words:
+            word = re.sub(r'[^a-z]', '', word)
+            if len(word) >= 2:
+                word_freq[word] = word_freq.get(word, 0) + 1
+
+        sorted_freq = sorted(word_freq.items(), key=lambda x: x[1], reverse=True)
+        sorted_freq = [item for item in sorted_freq if item[1] >= 2]
+        title = "Частота англійських слів у тексті (повторилось 2+ рази)"
+        result_data = sorted_freq
+
+    end_time = time.time()
+    execution_time = round(end_time - start_time, 3)
+    last_modified = datetime.fromtimestamp(os.path.getmtime(file_path)).strftime('%d.%m.%Y %H:%M:%S')
+
+    print(f"\n{title}")
+
+    for item, count in result_data:
+        print(f"{item} - {count} разів")
+
+    with open(result_path, "w", encoding='utf-8') as f:
+        f.write(f"Аналіз тексту\n")
+        f.write(f"Час створення результату: {start_datetime}\n")
+        f.write(f"Час останніх змін вихідного файлу: {last_modified}\n")
+        f.write(f"Час виконання аналізу: {execution_time} сек\n")
+        f.write(f"{title}\n")
+
+        for item, count in result_data:
+            f.write(f"{item} - {count} разів\n")
+
+    print(f"\nЧас виконання: {execution_time} сек")
+
+
+def task7():
+    dic_task7 = os.path.join(curr_dic, 'file for task 7')
+    if not os.path.exists(dic_task7):
+        os.makedirs(dic_task7)
+
+    file_path = os.path.join(dic_task7, 'marks2.lab11.csv')
+    result_path = os.path.join(dic_task7, 'statistics.txt')
+
+    students_data = []
+    all_marks = []
+    question_stats = defaultdict(lambda: {'correct': 0, 'total': 0})
+    time_marks = []
+
+    try:
+        with open(file_path, "r", encoding='utf-8') as f:
+            reader = csv.reader(f)
+            for row_num, row in enumerate(reader, 1):
+                if len(row) < 5:
+                    continue
+
+                try:
+                    student_id = row[0]
+                    time_str = row[3]
+                    mark_str = row[4].replace(',', '.')
+
+                    if mark_str.strip() == '-' or mark_str.strip() == '':
+                        continue
+
+                    mark = float(mark_str)
+
+                    answers = []
+                    for x in row[5:]:
+                        x_cleaned = x.strip().replace(',', '.')
+                        if x_cleaned == '-' or x_cleaned == '':
+                            answers.append(0.0)
+                        else:
+                            answers.append(float(x_cleaned))
+
+                    minutes = int(time_str.split()[0])
+
+                    students_data.append({
+                        'id': student_id,
+                        'time': minutes,
+                        'mark': mark,
+                        'answers': answers
+                    })
+
+                    all_marks.append(mark)
+                    time_marks.append((mark, minutes))
+
+                    for i, answer in enumerate(answers):
+                        question_stats[i]['total'] += 1
+                        if answer > 0:
+                            question_stats[i]['correct'] += 1
+
+                except ValueError as e:
+                    print(f"Помилка в рядку {row_num}: {e}")
+                    continue
+
+        if not students_data:
+            print("Не знайдено валідних даних студентів")
+            return
+
+        student_count = len(students_data)
+        mark_distribution = Counter(all_marks)
+
+        print(f"Кількість студентів: {student_count}")
+        print("\nРозподіл оцінок:")
+        for mark in sorted(mark_distribution.keys()):
+            count = mark_distribution[mark]
+            print(f"  {mark:.2f}: {count} студентів")
+
+        print("\nСередня оцінка за 1 хвилину:")
+        if time_marks:
+            min_time = min(t[1] for t in time_marks)
+            max_time = max(t[1] for t in time_marks)
+            for minute in range(min_time, max_time + 1):
+                minute_marks = [m[0] for m in time_marks if m[1] == minute]
+                if minute_marks:
+                    avg_mark = sum(minute_marks) / len(minute_marks)
+                    print(f"  {minute} хв: {avg_mark:.2f}")
+
+        time_marks.sort(key=lambda x: x[0] / x[1], reverse=True)
+        top_5 = time_marks[:5]
+
+        with open(result_path, "w", encoding='utf-8') as f:
+            f.write("Статистика тестування\n")
+
+            f.write(f"Кількість студентів: {student_count}\n\n")
+
+            f.write("Розподіл оцінок:\n")
+            for mark in sorted(mark_distribution.keys()):
+                count = mark_distribution[mark]
+                f.write(f"  {mark:.2f}: {count} студентів\n")
+
+            f.write("\nСтатистика по питанням\n")
+
+            for q_num in sorted(question_stats.keys()):
+                stats = question_stats[q_num]
+                correct = stats['correct']
+                total = stats['total']
+                correct_percent = (correct / total * 100) if total > 0 else 0
+                incorrect_percent = ((total - correct) / total * 100) if total > 0 else 0
+
+                f.write(f"Питання {q_num + 1}:\n")
+                f.write(f"Правильних: {correct} ({correct_percent:.1f}%)\n")
+                f.write(f"Неправильних: {total - correct} ({incorrect_percent:.1f}%)\n\n")
+
+            f.write("5 найкращих оцінок\n")
+
+            for i, (mark, time_spent) in enumerate(top_5, 1):
+                ratio = mark / time_spent
+                f.write(f"{i}. Оцінка {mark:.2f} за {time_spent} хв (коефіцієнт: {ratio:.3f})\n")
+
+    except Exception as e:
+        print(f"Помилка при обробці файлу: {e}")
+
+
 def main():
     while True:
         try:
@@ -158,6 +415,12 @@ def main():
                     task3()
                 case 4:
                     task4()
+                case 5:
+                    task5()
+                case 6:
+                    task6()
+                case 7:
+                    task7()
                 case _:
                     print("Функції з таким номером не має")
         except ValueError:
