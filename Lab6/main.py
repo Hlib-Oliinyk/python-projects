@@ -213,6 +213,11 @@ def task6():
     with open(file_path, "r", encoding='utf-8') as f:
         text = f.read()
 
+    word_count = len(text.split())
+    if word_count > 3000:
+        print("Текст не може бути більше 3000 слів")
+        return
+
     text_lower = text.lower()
 
     choice = None
