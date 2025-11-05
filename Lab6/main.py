@@ -218,6 +218,11 @@ def task6():
         print("Текст не може бути більше 3000 слів")
         return
 
+    letter_count = sum(1 for char in text if char.isalpha())
+    if letter_count == 0:
+        print("Текст не містить букв")
+        return
+
     text_lower = text.lower()
 
     choice = None
