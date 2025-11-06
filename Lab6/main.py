@@ -223,6 +223,11 @@ def task6():
         print("Текст не містить букв")
         return
 
+    english_letter_count = sum(1 for char in text if char.isalpha() and ord(char) < 128)
+    if english_letter_count == 0:
+        print("Текст не містить англійських букв")
+        return
+
     text_lower = text.lower()
 
     choice = None
@@ -234,7 +239,7 @@ def task6():
         choice = input("Введіть 1, 2 або 3: ").strip()
 
         if choice not in ["1", "2", "3"]:
-            print("Невірний вибір! Спробуйте ще раз.\n")
+            print("Невірний вибір\n")
 
     if choice == "1":
         letter_freq = {}
