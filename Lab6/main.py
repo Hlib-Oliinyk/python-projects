@@ -239,7 +239,7 @@ def task6():
         choice = input("Введіть 1, 2 або 3: ").strip()
 
         if choice not in ["1", "2", "3"]:
-            print("Невірний вибір! Спробуйте ще раз.\n")
+            print("Невірний вибір\n")
 
     if choice == "1":
         letter_freq = {}
