@@ -104,6 +104,10 @@ def task4():
 
     language = input("Введіть мову програмування замість Python: ").strip()
 
+    while not language:
+        print("Поле не може бути порожнім")
+        language = input("Введіть мову програмування замість Python: ").strip()
+
     with open(true_path, "w", encoding='utf-8') as f:
         f.write('')
     with open(false_path, "w", encoding='utf-8') as f:
