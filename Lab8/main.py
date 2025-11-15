@@ -1,4 +1,6 @@
 import random
+import re
+from shop_module import Shop, Discount
 
 def is_number(value):
     try:
@@ -293,8 +295,103 @@ class RomanToDecimal:
         if decimal_to_roman.convert(total) != roman:
             print("Помилка: некоректний формат римського числа")
             return None
-
         return total
+
+
+class User:
+    def __init__(self, first_name, last_name, email, nickname, newsletter_consent):
+        self.valid = True
+
+        if not isinstance(first_name, str) or not first_name.strip():
+            print("Помилка: first_name має бути непорожнім рядком")
+            self.valid = False
+            self.first_name = None
+        else:
+            self.first_name = first_name.strip()
+
+        if not isinstance(last_name, str) or not last_name.strip():
+            print("Помилка: last_name має бути непорожнім рядком")
+            self.valid = False
+            self.last_name = None
+        else:
+            self.last_name = last_name.strip()
+
+        if not isinstance(email, str) or not email.strip():
+            print("Помилка: email має бути непорожнім рядком")
+            self.valid = False
+            self.email = None
+        elif not self.is_valid_email(email):
+            print("Помилка: некоректний формат email")
+            self.valid = False
+            self.email = None
+        else:
+            self.email = email.strip()
+
+        if not isinstance(nickname, str) or not nickname.strip():
+            print("Помилка: nickname має бути непорожнім рядком")
+            self.valid = False
+            self.nickname = None
+        else:
+            self.nickname = nickname.strip()
+
+        if not isinstance(newsletter_consent, bool):
+            print("Помилка: newsletter_consent має бути булевим значенням")
+            self.valid = False
+            self.newsletter_consent = False
+        else:
+            self.newsletter_consent = newsletter_consent
+
+        self.login_attempts = 0
+
+    def is_valid_email(self, email):
+        pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+        return bool(re.match(pattern, email.strip()))
+
+    def describe_user(self):
+        if not self.valid:
+            return
+        print(f"Користувач: {self.first_name} {self.last_name}")
+
+    def greeting_user(self):
+        if not self.valid:
+            return
+        print(f"Вітаємо, {self.nickname}!")
+
+    def increment_login_attempts(self):
+        if not self.valid:
+            return
+        self.login_attempts += 1
+
+    def reset_login_attempts(self):
+        if not self.valid:
+            return
+        self.login_attempts = 0
+
+
+class Privileges:
+    def __init__(self, privileges=None):
+        if privileges is None:
+            self.privileges = []
+        elif isinstance(privileges, list) and all(isinstance(p, str) for p in privileges):
+            self.privileges = privileges
+        else:
+            print("Помилка: privileges має бути списком рядків")
+            self.privileges = []
+
+    def show_privileges(self):
+        if not self.privileges:
+            print("Немає привілеїв")
+            return
+        print("Привілеї адміністратора:")
+        for p in self.privileges:
+            print(f"- {p}")
+
+
+class Admin(User):
+    def __init__(self, first_name, last_name, email, nickname, newsletter_consent, privileges=None):
+        super().__init__(first_name, last_name, email, nickname, newsletter_consent)
+        self.privileges = Privileges(privileges)
+
 
 def task1():
     account = Bank(1000)
@@ -366,6 +463,54 @@ def task7():
     r2d = RomanToDecimal()
     print(r2d.convert("MCMXCIV"))
 
+def task8():
+    all_store = Shop("SuperMart", "Універсальний магазин")
+    if not all_store.valid:
+        return
+
+    all_store.describe_shop()
+    all_store.open_shop()
+    print(all_store.number_of_units)
+    all_store.set_number_of_units(10)
+    print(all_store.number_of_units)
+    all_store.increment_number_of_units(5)
+    print(all_store.number_of_units)
+
+    store_discount = Discount("TechStore", "Електроніка", ["Ноутбуки", "Смартфони"])
+    store_discount.get_discounts_products()
+
+def task9():
+    user1 = User("Олександр", "Іваненко", "alex@example.com", "Alex", True)
+    user2 = User("Марія", "Петренко", "maria@example.com", "Maria", False)
+    user3 = User("Сергій", "Коваленко", "serg@example.com", "Serg", True)
+
+    for user in (user1, user2, user3):
+        if not user.valid:
+            print(f"Пропущено користувача через некоректні дані")
+            continue
+        user.describe_user()
+        user.greeting_user()
+
+    if user1.valid:
+        print(f"Вхідні спроби: {user1.login_attempts}")
+        user1.increment_login_attempts()
+        user1.increment_login_attempts()
+        print(f"Вхідні спроби після двох невдалих: {user1.login_attempts}")
+        user1.reset_login_attempts()
+        print(f"Вхідні спроби після скидання: {user1.login_attempts}")
+
+    admin = Admin(
+        "Анна", "Сидоренко", "anna@example.com", "Anna", True,
+        ["Дозвіл додавати повідомлення", "Дозвіл видаляти користувачів", "Дозвіл банити користувачів"]
+    )
+
+    if admin.valid:
+        admin.describe_user()
+        admin.greeting_user()
+        admin.privileges.show_privileges()
+    else:
+        print("Некоректні дані адміністратора")
+
 def main():
     while True:
         try:
@@ -387,6 +532,10 @@ def main():
                     task6()
                 case 7:
                     task7()
+                case 8:
+                    task8()
+                case 9:
+                    task9()
                 case _:
                     print("Функції з таким номером не має")
         except ValueError:
