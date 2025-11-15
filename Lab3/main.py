@@ -72,7 +72,8 @@ def task4():
         words = list(ua.finditer(text))
         n = len(words)
         if n == 0:
-            print(" | "); break
+            print(" | ")
+            break
         if n > 1000:
             print("Кількість слів більше 1000")
             continue

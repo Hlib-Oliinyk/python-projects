@@ -1,31 +1,33 @@
 from datetime import datetime
 
-def task1():
-    def is_prime(num):
-        if num < 2:
+
+def is_prime(num):
+    if num < 2:
+        return False
+    for i in range(2, int(num ** 0.5) + 1):
+        if num % i == 0:
             return False
-        for i in range(2, int(num ** 0.5) + 1):
-            if num % i == 0:
-                return False
-        return True
+    return True
 
-    def generate_primes(N):
-        primes = []
-        for i in range(N + 1):
-            if is_prime(i):
-                primes.append(i)
+def generate_primes(N):
+    primes = []
+    for i in range(N + 1):
+        if is_prime(i):
+            primes.append(i)
+    return primes
+
+
+def format_result(primes, format):
+    if format == 'list':
         return primes
+    elif format == 'column':
+        return '\n'.join(map(str, primes))
+    elif format == 'count':
+        return len(primes)
+    else:
+        return "Неправильний формат"
 
-    def format_result(primes, format):
-        if format == 'list':
-            return primes
-        elif format == 'column':
-            return '\n'.join(map(str, primes))
-        elif format == 'count':
-            return len(primes)
-        else:
-            return "Неправильний формат"
-
+def task1():
     def find_primes(n, output_format):
         primes = generate_primes(n)
         return format_result(primes, output_format)
