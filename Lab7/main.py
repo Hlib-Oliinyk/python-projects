@@ -9,7 +9,7 @@ def dictionary_path():
     return os.path.join(current_work_path(), "file for task 2")
 
 def file_path():
-    return os.path.join(dictionary_path(), "people.txt")
+    return os.path.join(dictionary_path(), "people.csv")
 
 class Person:
     def __init__(self, surname, first_name, birth_date, nickname=None):
@@ -48,6 +48,63 @@ class Person:
     def get_fullname(self):
         return f"{self.firstname} {self.surname}"
 
+def modifier(filename):
+    try:
+        with open(filename, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+    except FileNotFoundError:
+        print("Файл не знайдено")
+        return
+    except Exception as e:
+        print(f"Помилка при читанні файлу: {e}")
+        return
+    if not lines:
+        print("Файл порожній")
+        return
+
+    headers = lines[0].strip().split(",")
+    required_columns = ["surname", "name", "birth_date"]
+    for col in required_columns:
+        if col not in headers:
+            print(f"Відсутня необхідна колонка '{col}' у файлі")
+            return
+
+    name_index = headers.index("name")
+    surname_index = headers.index("surname")
+    birth_date_index = headers.index("birth_date")
+    nickname_index = headers.index("nickname") if "nickname" in headers else None
+
+    new_headers = headers[:name_index+1] + ["fullname"] + headers[name_index+1:] + ["age"]
+
+    new_lines = [",".join(new_headers) + "\n"]
+
+    for line in lines[1:]:
+        data = line.strip().split(",")
+        if len(data) < len(headers):
+            print(f"Некоректний рядок (неповний): {line.strip()}")
+            new_lines.append(line)
+            continue
+
+        surname = data[surname_index]
+        first_name = data[name_index]
+        birth_date = data[birth_date_index]
+        nickname = data[nickname_index] if nickname_index is not None else None
+
+        person = Person(surname, first_name, birth_date, nickname)
+        if not person.valid:
+            print(f"Неправильно заповнене поле в записі: {line.strip()}")
+            new_lines.append(line)
+            continue
+
+        fullname = person.get_fullname()
+        age = person.get_age()
+
+        new_data = data[:name_index+1] + [fullname] + data[name_index+1:] + [age]
+        new_lines.append(",".join(new_data) + "\n")
+
+    with open(filename, "w", encoding="utf-8") as f:
+        f.writelines(new_lines)
+
 def task1():
     person1 = Person("Олійник", "Гліб", "2007-07-07")
 
@@ -55,9 +112,24 @@ def task1():
         print(person1.get_fullname())
         print(person1.get_age())
 
+def task2():
+    modifier(file_path())
 
 def main():
-    task1()
+    while True:
+        try:
+            choice = int(input("Виберіть номер функції (0 - вихід): "))
+            match choice:
+                case 0:
+                    break
+                case 1:
+                    task1()
+                case 2:
+                    task2()
+                case _:
+                    print("Функції з таким номером не має")
+        except ValueError:
+            print("Ви ввели не число")
 
 if __name__ == "__main__":
     main()
