@@ -203,6 +203,98 @@ class Pets:
             if hasattr(pet, 'play_behavior'):
                 print(pet.play_behavior())
 
+class Buffer:
+    def __init__(self):
+        self._buffer = []
+
+    def add(self, *a):
+        for x in a:
+            if not isinstance(x, int):
+                print(f"Пропущено некоректне значення: {x} (повинно бути цілим числом)")
+                continue
+            self._buffer.append(x)
+
+        while len(self._buffer) >= 5:
+            current_five = self._buffer[:5]
+            total = sum(current_five)
+            print(f"Сума п’ятірки: {total}")
+            self._buffer = self._buffer[5:]
+
+    def get_current_part(self):
+        return self._buffer.copy()
+
+class NameLengthError(ValueError):
+    pass
+
+def check_name(name):
+    if not isinstance(name, str):
+        print(f"Помилка: ім'я має бути рядком, а не {type(name).__name__}")
+        return
+    clean_name = name.strip()
+    if len(clean_name) < 10:
+        raise NameLengthError(f"Довжина менша за 10 символів")
+
+class DecimalToRoman:
+    def __init__(self):
+        self.roman_map = [
+            ("M", 1000), ("CM", 900), ("D", 500), ("CD", 400),
+            ("C", 100), ("XC", 90), ("L", 50), ("XL", 40),
+            ("X", 10), ("IX", 9), ("V", 5), ("IV", 4), ("I", 1)
+        ]
+
+    def convert(self, number):
+        if not isinstance(number, int):
+            print("Помилка: число має бути цілим")
+            return None
+        if number <= 0 or number >= 4000:
+            print("Помилка: число має бути від 1 до 3999")
+            return None
+
+        result = ""
+        for roman, value in self.roman_map:
+            while number >= value:
+                result += roman
+                number -= value
+        return result
+
+class RomanToDecimal:
+    def __init__(self):
+        self.roman_values = {
+            "I": 1, "V": 5, "X": 10, "L": 50,
+            "C": 100, "D": 500, "M": 1000
+        }
+
+    def convert(self, roman):
+        if not isinstance(roman, str):
+            print("Помилка: вхідне значення має бути рядком")
+            return None
+
+        roman = roman.upper().strip()
+        if not roman:
+            print("Помилка: рядок не може бути порожнім")
+            return None
+
+        for ch in roman:
+            if ch not in self.roman_values:
+                print(f"Помилка: недопустимий символ '{ch}' у римському числі")
+                return None
+
+        total = 0
+        prev_value = 0
+        for ch in reversed(roman):
+            value = self.roman_values[ch]
+            if value < prev_value:
+                total -= value
+            else:
+                total += value
+            prev_value = value
+
+        decimal_to_roman = DecimalToRoman()
+        if decimal_to_roman.convert(total) != roman:
+            print("Помилка: некоректний формат римського числа")
+            return None
+
+        return total
 
 def task1():
     account = Bank(1000)
@@ -245,6 +337,35 @@ def task4():
 
     my_pets.show_pets_info()
 
+def task5():
+    buf = Buffer()
+    buf.add(1, 2, 3)
+    print("Поточний буфер:", buf.get_current_part())
+
+    buf.add(4, 5, 6, 7, 8)
+    print("Поточний буфер:", buf.get_current_part())
+
+    buf.add(9, 10)
+    print("Поточний буфер:", buf.get_current_part())
+
+def task6():
+    try:
+        check_name("Олександр")
+    except NameLengthError as e:
+        print(f"Виняток: {e}")
+
+    try:
+        check_name("Олександрович")
+    except NameLengthError as e:
+        print(f"Виняток: {e}")
+
+def task7():
+    d2r = DecimalToRoman()
+    print(d2r.convert(1994))
+
+    r2d = RomanToDecimal()
+    print(r2d.convert("MCMXCIV"))
+
 def main():
     while True:
         try:
@@ -260,6 +381,12 @@ def main():
                     task3()
                 case 4:
                     task4()
+                case 5:
+                    task5()
+                case 6:
+                    task6()
+                case 7:
+                    task7()
                 case _:
                     print("Функції з таким номером не має")
         except ValueError:
