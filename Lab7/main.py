@@ -75,14 +75,14 @@ def modifier(filename):
     nickname_index = headers.index("nickname") if "nickname" in headers else None
 
     new_headers = headers[:name_index+1] + ["fullname"] + headers[name_index+1:] + ["age"]
-
     new_lines = [",".join(new_headers) + "\n"]
 
     for line in lines[1:]:
         data = line.strip().split(",")
         if len(data) < len(headers):
             print(f"Некоректний рядок (неповний): {line.strip()}")
-            new_lines.append(line)
+            new_data = data[:name_index+1] + [""] + data[name_index+1:] + [""]
+            new_lines.append(",".join(new_data) + "\n")
             continue
 
         surname = data[surname_index]
@@ -93,7 +93,8 @@ def modifier(filename):
         person = Person(surname, first_name, birth_date, nickname)
         if not person.valid:
             print(f"Неправильно заповнене поле в записі: {line.strip()}")
-            new_lines.append(line)
+            new_data = data[:name_index+1] + [""] + data[name_index+1:] + [""]
+            new_lines.append(",".join(new_data) + "\n")
             continue
 
         fullname = person.get_fullname()
