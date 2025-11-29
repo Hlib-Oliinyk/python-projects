@@ -201,7 +201,7 @@ class Apple:
                 print(f"{error}")
             raise SystemExit(1)
 
-        print(f"Яблуко #{self._index} створено: {self._state}")
+        print(f"Яблуко №{self._index} створено: {self._state}")
 
     def grow(self):
         current_idx = self.states.index(self._state)
@@ -348,9 +348,21 @@ class KmrCsv:
         try:
             students = []
             with open(self.ref, 'r', encoding='utf-8') as f:
-                reader = csv.DictReader(f)
+                reader = csv.reader(f)
+
                 for row in reader:
-                    students.append(row)
+                    if len(row) < 5:
+                        continue
+
+                    student = {
+                        "id": row[0],
+                        "start": row[1],
+                        "end": row[2],
+                        "duration": row[3],
+                        "total": row[4].replace(',', '.'),
+                        "questions": [v.replace(',', '.') for v in row[5:]]
+                    }
+                    students.append(student)
             return students
         except Exception as e:
             print(f"Помилка читання CSV: {e}")
@@ -358,7 +370,7 @@ class KmrCsv:
 
     def file_info(self):
         students = self.read_csv()
-        print(f"КМР #{self.num}: {len(students)} студентів")
+        print(f"КМР №{self.num}: {len(students)} студентів")
 
 
 class Statistic:
@@ -367,107 +379,70 @@ class Statistic:
         if not students:
             return tuple()
 
-        cols = list(students[0].keys())
-        question_cols = cols[-3:]
+        questions_count = len(students[0]["questions"])
+        total_correct = [0] * questions_count
 
-        total_correct = [0] * len(question_cols)
-
-        for student in students:
-            for i, col in enumerate(question_cols):
+        for st in students:
+            for i, val in enumerate(st["questions"]):
                 try:
-                    value = float(student[col].replace(',', '.'))
-                    if value > 0:
+                    if float(val) > 0:
                         total_correct[i] += 1
                 except:
                     pass
 
-        percentages = tuple((correct / len(students)) * 100 for correct in total_correct)
-        return percentages
+        return tuple(correct / len(students) * 100 for correct in total_correct)
 
     def marks_stat(self, students: List[Dict]) -> Dict[float, int]:
         marks = {}
-        cols = list(students[0].keys())
-        question_cols = cols[-3:]
-
-        for student in students:
-            total = 0
-            for col in question_cols:
+        for st in students:
+            total = 0.0
+            for val in st["questions"]:
                 try:
-                    value = float(student[col].replace(',', '.'))
-                    total += value
+                    total += float(val)
                 except:
                     pass
-
-            marks[round(total, 2)] = marks.get(round(total, 2), 0) + 1
-
+            total = round(total, 2)
+            marks[total] = marks.get(total, 0) + 1
         return marks
 
     def marks_per_time(self, students: List[Dict]) -> Dict[str, float]:
         result = {}
-        cols = list(students[0].keys())
-
-        id_col = cols[0]
-        duration_col = cols[3]
-        question_cols = cols[-3:]
-
-        for student in students:
-            student_id = student[id_col]
-
-            total_mark = 0
-            for col in question_cols:
+        for st in students:
+            total_mark = 0.0
+            for val in st["questions"]:
                 try:
-                    value = float(student[col].replace(',', '.'))
-                    total_mark += value
+                    total_mark += float(val)
                 except:
                     pass
 
-            try:
-                duration_str = student[duration_col]
-                time_match = re.search(r'(\d+)\s*хв\s*(\d+)\s*сек', duration_str)
-                if time_match:
-                    minutes = int(time_match.group(1))
-                    seconds = int(time_match.group(2))
-                    total_seconds = minutes * 60 + seconds
-                    total_minutes = total_seconds / 60
+            m = re.search(r'(\d+)\s*хв\s*(\d+)\s*сек', st["duration"])
+            if not m:
+                continue
+            minutes = int(m.group(1))
+            seconds = int(m.group(2))
+            total_minutes = (minutes * 60 + seconds) / 60
+            if total_minutes <= 0:
+                continue
 
-                    if total_minutes > 0:
-                        result[student_id] = total_mark / total_minutes
-            except:
-                pass
-
+            result[st["id"]] = total_mark / total_minutes
         return result
 
-    def best_marks_per_time(self, students: List[Dict], bottom_margin: float, top_margin: float) -> Tuple:
-        if not isinstance(bottom_margin, (int, float)) or not isinstance(top_margin, (int, float)):
-            print("Межі мають бути числами")
-            return tuple()
-
-        if bottom_margin < 0 or top_margin < bottom_margin:
-            print("Неправильний діапазон")
-            return tuple()
-
-        marks_per_time = self.marks_per_time(students)
-        cols = list(students[0].keys())
-        question_cols = cols[-3:]
-
+    def best_marks_per_time(self, students, bottom_margin, top_margin):
+        mpt = self.marks_per_time(students)
         filtered = []
 
-        for student in students:
-            student_id = student[cols[0]]
-
-            total_mark = 0
-            for col in question_cols:
+        for st in students:
+            total_mark = 0.0
+            for val in st["questions"]:
                 try:
-                    value = float(student[col].replace(',', '.'))
-                    total_mark += value
+                    total_mark += float(val)
                 except:
                     pass
 
-            if student_id in marks_per_time and bottom_margin <= total_mark <= top_margin:
-                filtered.append((student_id, total_mark, marks_per_time[student_id]))
+            if st["id"] in mpt and bottom_margin <= total_mark <= top_margin:
+                filtered.append((st["id"], total_mark, mpt[st["id"]]))
 
         filtered.sort(key=lambda x: x[2], reverse=True)
-
         return tuple(filtered[:5])
 
 
