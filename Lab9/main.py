@@ -570,10 +570,10 @@ class KmrWork(KmrCsv, Statistic, Plots):
             for s in stds:
                 try:
                     duration_str = s[d_col]
-                    time_match = re.search(r'(\d+)\s*хв\s*(\d+)\s*сек', duration_str)
+                    time_match = re.search(r'(\d+)\s*хв(?:\s*(\d+)\s*сек)?', duration_str)
                     if time_match:
                         minutes = int(time_match.group(1))
-                        seconds = int(time_match.group(2))
+                        seconds = int(time_match.group(2)) if time_match.group(2) else 0
                         total_seconds += minutes * 60 + seconds
                         count += 1
                 except:
