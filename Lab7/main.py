@@ -48,6 +48,7 @@ class Person:
     def get_fullname(self):
         return f"{self.firstname} {self.surname}"
 
+
 def modifier(filename):
     try:
         with open(filename, "r", encoding="utf-8") as f:
@@ -64,6 +65,7 @@ def modifier(filename):
 
     headers = lines[0].strip().split(",")
     required_columns = ["surname", "name", "birth_date"]
+
     for col in required_columns:
         if col not in headers:
             print(f"Відсутня необхідна колонка '{col}' у файлі")
@@ -74,15 +76,19 @@ def modifier(filename):
     birth_date_index = headers.index("birth_date")
     nickname_index = headers.index("nickname") if "nickname" in headers else None
 
-    new_headers = headers[:name_index+1] + ["fullname"] + headers[name_index+1:] + ["age"]
+    output_filename = filename.replace(".csv", "_modified.csv")
+    new_headers = headers[:name_index + 1] + ["fullname"] + headers[name_index + 1:] + ["age"]
     new_lines = [",".join(new_headers) + "\n"]
 
-    for line in lines[1:]:
+    valid_rows = 0
+    invalid_rows = 0
+
+
+    for line_num, line in enumerate(lines[1:], 2):
         data = line.strip().split(",")
+
         if len(data) < len(headers):
-            print(f"Некоректний рядок (неповний): {line.strip()}")
-            new_data = data[:name_index+1] + [""] + data[name_index+1:] + [""]
-            new_lines.append(",".join(new_data) + "\n")
+            invalid_rows += 1
             continue
 
         surname = data[surname_index]
@@ -91,20 +97,21 @@ def modifier(filename):
         nickname = data[nickname_index] if nickname_index is not None else None
 
         person = Person(surname, first_name, birth_date, nickname)
+
         if not person.valid:
-            print(f"Неправильно заповнене поле в записі: {line.strip()}")
-            new_data = data[:name_index+1] + [""] + data[name_index+1:] + [""]
-            new_lines.append(",".join(new_data) + "\n")
+            invalid_rows += 1
             continue
 
         fullname = person.get_fullname()
         age = person.get_age()
-
-        new_data = data[:name_index+1] + [fullname] + data[name_index+1:] + [age]
+        new_data = data[:name_index + 1] + [fullname] + data[name_index + 1:] + [age]
         new_lines.append(",".join(new_data) + "\n")
+        valid_rows += 1
 
-    with open(filename, "w", encoding="utf-8") as f:
+
+    with open(output_filename, "w", encoding="utf-8") as f:
         f.writelines(new_lines)
+
 
 def task1():
     person1 = Person("Олійник", "Гліб", "2007-07-07")
